@@ -1,95 +1,68 @@
 import { SearchBar } from './SearchBar/SearchBar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Component } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FetchImages } from './services/FetchImages';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { ModalWindow } from './Modal/Modal';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-export class App extends Component {
-  state = {
-    images: [],
-    query: null,
-    page: 1,
-    per_page: 12,
-    error: null,
-    loader: false,
-    largeImageURL: '',
-    showMore: false,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [errorValue, setErrorValue] = useState(null);
+  const [loader, setLoader] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
+  const [showMore, setShowMore] = useState(false);
+  const [per_page] = useState(12);
 
-  componentDidUpdate(prevProps, previousState) {
-    if (
-      this.state.query !== previousState.query ||
-      this.state.page !== previousState.page
-    ) {
-      this.onFetchData();
-    }
-  }
-
-  
-
-  onFetchData = async () => {
-    this.setState({
-      loader: true,
-    });
+  const onFetchData = useCallback(async () => {
+    setLoader(true);
 
     try {
-      const { query, page, per_page } = this.state;
-      const images = await FetchImages(query, page, per_page);
-      this.setState(prevState => ({
-        images: [...prevState.images, ...images.hits],
-        showMore: this.state.page < Math.ceil(images.totalHits / this.state.per_page)
-      }));
-
-      
+      const imagesFetch = await FetchImages(query, page, per_page);
+      setImages(state => [...state, ...imagesFetch.hits]);
+      setShowMore(page < Math.ceil(imagesFetch.totalHits / per_page));
     } catch (error) {
-      this.setState({ error });
+      setErrorValue(error);
+      console.log(errorValue);
     } finally {
-      this.setState({
-        loader: false,
-      });
+      setLoader(false);
     }
+  }, [query, page, errorValue, per_page]);
+
+  useEffect(() => {
+    if (query === '') {
+      return;
+    }
+    onFetchData();
+  }, [query, page, onFetchData]);
+
+  const onLoadMore = () => {
+    setPage(state => state + 1);
   };
 
-  onLoadMore = () => {
-    this.setState(previousState => ({
-      page: previousState.page + 1,
-    }));
-  };
-
-  handleSubmit = e => {
+  const handleSubmit = e => {
     Notify.success(`Hoooray! We have found your pictures!`);
-    this.setState({
-      images: [],
-      query: e.target.elements.query.value,
-      page: 1,
-      per_page: 12,
-    });
+    setImages([]);
+    setQuery(e.target.elements.query.value);
+    setPage(1);
   };
 
-  onImageClick = largeImageURL => {
-    this.setState({ largeImageURL });
+  const onImageClick = largeImageURL => {
+    setLargeImageURL(largeImageURL);
   };
 
-  render() {
-    return (
-      <>
-        <SearchBar handleSubmit={this.handleSubmit} query={this.state.query} />
-        <ImageGallery
-          images={this.state.images}
-          onImageClick={this.onImageClick}
-        />
-        {this.state.showMore && <Button onLoadMore={this.onLoadMore} />}
-        {this.state.loader && <Loader />}
-        {this.state.largeImageURL && (
-          <ModalWindow
-            largeImgUrl={this.state.largeImageURL}
-            onImageClick={this.onImageClick}
-          />
-        )}
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <SearchBar handleSubmit={handleSubmit} query={query} />
+      <ImageGallery images={images} onImageClick={onImageClick} />
+      {showMore && <Button onLoadMore={onLoadMore} />}
+      {loader && <Loader />}
+      {largeImageURL && (
+        <ModalWindow largeImgUrl={largeImageURL} onImageClick={onImageClick} />
+      )}
+    </>
+  );
+};

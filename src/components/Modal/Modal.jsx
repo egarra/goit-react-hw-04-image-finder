@@ -1,40 +1,37 @@
-import { Component } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Backdrop, Modal, ImageComp, CloseBtn } from './Modal.styled';
 
-export class ModalWindow extends Component {
-  onCloseModalEsc = e => {
-    const { onImageClick } = this.props;
-    if (e.code === 'Escape') {
-      onImageClick('');
-    }
-  };
+export const ModalWindow = ({ onImageClick, largeImgUrl }) => {
+  const onCloseModalEsc = useCallback(
+    e => {
+      if (e.code === 'Escape') {
+        onImageClick('');
+      }
+    },
+    [onImageClick]
+  );
 
-  handleBackdrop = e => {
-    const { onImageClick } = this.props;
+  const handleBackdrop = e => {
     if (e.target === e.currentTarget) {
       onImageClick('');
     }
   };
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.onCloseModalEsc);
-  }
+  useEffect(() => {
+    window.addEventListener('keydown', onCloseModalEsc);
+    return () => {
+      window.removeEventListener('keydown', onCloseModalEsc);
+    };
+  }, [onCloseModalEsc]);
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onCloseModalEsc);
-  }
-
-  render() {
-    const { largeImgUrl, onImageClick } = this.props;
-    return (
-      <Backdrop onClick={this.handleBackdrop}>
-        <Modal>
-          <ImageComp src={largeImgUrl} alt="image" />
-          <CloseBtn type="button" onClick={() => onImageClick('')}>
-            X
-          </CloseBtn>
-        </Modal>
-      </Backdrop>
-    );
-  }
-}
+  return (
+    <Backdrop onClick={handleBackdrop}>
+      <Modal>
+        <ImageComp src={largeImgUrl} alt="image" />
+        <CloseBtn type="button" onClick={() => onImageClick('')}>
+          X
+        </CloseBtn>
+      </Modal>
+    </Backdrop>
+  );
+};
