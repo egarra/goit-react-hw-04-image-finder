@@ -1,16 +1,7 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { Backdrop, Modal, ImageComp, CloseBtn } from './Modal.styled';
 
 export const ModalWindow = ({ onImageClick, largeImgUrl }) => {
-  const onCloseModalEsc = useCallback(
-    e => {
-      if (e.code === 'Escape') {
-        onImageClick('');
-      }
-    },
-    [onImageClick]
-  );
-
   const handleBackdrop = e => {
     if (e.target === e.currentTarget) {
       onImageClick('');
@@ -18,11 +9,17 @@ export const ModalWindow = ({ onImageClick, largeImgUrl }) => {
   };
 
   useEffect(() => {
+    const onCloseModalEsc = e => {
+      if (e.code === 'Escape') {
+        onImageClick('');
+      }
+    }
+
     window.addEventListener('keydown', onCloseModalEsc);
     return () => {
       window.removeEventListener('keydown', onCloseModalEsc);
     };
-  }, [onCloseModalEsc]);
+  }, [onImageClick]);
 
   return (
     <Backdrop onClick={handleBackdrop}>

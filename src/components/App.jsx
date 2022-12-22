@@ -1,6 +1,6 @@
 import { SearchBar } from './SearchBar/SearchBar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { FetchImages } from './services/FetchImages';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
@@ -17,27 +17,24 @@ export const App = () => {
   const [showMore, setShowMore] = useState(false);
   const [per_page] = useState(12);
 
-  const onFetchData = useCallback(async () => {
-    setLoader(true);
-
-    try {
-      const imagesFetch = await FetchImages(query, page, per_page);
-      setImages(state => [...state, ...imagesFetch.hits]);
-      setShowMore(page < Math.ceil(imagesFetch.totalHits / per_page));
-    } catch (error) {
-      setErrorValue(error);
-      console.log(errorValue);
-    } finally {
-      setLoader(false);
-    }
-  }, [query, page, errorValue, per_page]);
-
   useEffect(() => {
     if (query === '') {
       return;
     }
-    onFetchData();
-  }, [query, page, onFetchData]);
+    const fetchData = async () => {
+      try {
+        const imagesFetch = await FetchImages(query, page, per_page);
+        setImages(state => [...state, ...imagesFetch.hits]);
+        setShowMore(page < Math.ceil(imagesFetch.totalHits / per_page));
+      } catch (error) {
+        setErrorValue(error);
+        console.log(errorValue);
+      } finally {
+        setLoader(false);
+      }
+    }
+    fetchData();
+  }, [query, page, errorValue, per_page]);
 
   const onLoadMore = () => {
     setPage(state => state + 1);
