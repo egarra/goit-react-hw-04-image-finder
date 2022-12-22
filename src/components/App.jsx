@@ -15,7 +15,6 @@ export const App = () => {
   const [loader, setLoader] = useState(false);
   const [largeImageURL, setLargeImageURL] = useState('');
   const [showMore, setShowMore] = useState(false);
-  const [per_page] = useState(12);
 
   useEffect(() => {
     if (query === '') {
@@ -23,18 +22,17 @@ export const App = () => {
     }
     const fetchData = async () => {
       try {
-        const imagesFetch = await FetchImages(query, page, per_page);
+        const imagesFetch = await FetchImages(query, page);
         setImages(state => [...state, ...imagesFetch.hits]);
-        setShowMore(page < Math.ceil(imagesFetch.totalHits / per_page));
+        setShowMore(page < Math.ceil(imagesFetch.totalHits / 12));
       } catch (error) {
         setErrorValue(error);
-        console.log(errorValue);
       } finally {
         setLoader(false);
       }
     }
     fetchData();
-  }, [query, page, errorValue, per_page]);
+  }, [query, page]);
 
   const onLoadMore = () => {
     setPage(state => state + 1);
@@ -54,6 +52,7 @@ export const App = () => {
   return (
     <>
       <SearchBar handleSubmit={handleSubmit} query={query} />
+      {errorValue && <p>Server doesn't respond</p>}
       <ImageGallery images={images} onImageClick={onImageClick} />
       {showMore && <Button onLoadMore={onLoadMore} />}
       {loader && <Loader />}
