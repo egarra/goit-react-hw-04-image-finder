@@ -20,7 +20,6 @@ export const App = () => {
     if (query === '') {
       return;
     }
-    console.log('потом работает это');
     const fetchData = async () => {
       try {
         setLoader(true);
@@ -50,7 +49,6 @@ export const App = () => {
   };
 
   const handleSubmit = e => {
-    console.log('сперва работает это');
     setImages([]);
     setQuery(e.target.elements.query.value);
     setPage(1);
