@@ -1,4 +1,14 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+// Define a keyframe animation for fade-in
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
 
 export const Backdrop = styled.div`
   position: fixed;
@@ -7,6 +17,8 @@ export const Backdrop = styled.div`
   width: 100%;
   height: 100%;
   background-color: rgb(0 0 0 / 78%);
+  opacity: 0;
+  animation: ${fadeIn} 0.3s ease-out forwards;
 `;
 
 export const Modal = styled.div`
@@ -21,12 +33,15 @@ export const Modal = styled.div`
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2), 0px 1px 1px rgba(0, 0, 0, 0.2),
     0px 2px 1px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+  opacity: 0;
+  animation: ${fadeIn} 0.3s ease-out forwards;
 `;
 
 export const ImageComp = styled.img`
   display: block;
   width: 100%;
 `;
+
 export const CloseBtn = styled.button`
   border-radius: 50%;
   padding: 10px 15px;
