@@ -20,9 +20,20 @@ export const App = () => {
     if (query === '') {
       return;
     }
+    console.log('потом работает это');
     const fetchData = async () => {
       try {
+        setLoader(true);
         const imagesFetch = await FetchImages(query, page);
+        console.log(imagesFetch);
+
+        if (page === 1) {
+          if (imagesFetch.hits.length > 0) {
+            Notify.success(`Hooray! We have found your pictures!`);
+          } else {
+            Notify.failure(`We didn't find your pictures, please try again`);
+          }
+        }
         setImages(state => [...state, ...imagesFetch.hits]);
         setShowMore(page < Math.ceil(imagesFetch.totalHits / 12));
       } catch (error) {
@@ -30,7 +41,7 @@ export const App = () => {
       } finally {
         setLoader(false);
       }
-    }
+    };
     fetchData();
   }, [query, page]);
 
@@ -39,7 +50,7 @@ export const App = () => {
   };
 
   const handleSubmit = e => {
-    Notify.success(`Hoooray! We have found your pictures!`);
+    console.log('сперва работает это');
     setImages([]);
     setQuery(e.target.elements.query.value);
     setPage(1);
